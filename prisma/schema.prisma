@@ -11,3 +11,65 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  Admin
+}
+
+enum EVENT_TYPE {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+enum STATUS_OUTBOX {
+  PENDING
+  SENT
+  FAILED
+}
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          UserRole   @default(STUDENT)
+  is_verified   Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  token Token[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Token {
+  id         String     @id @default(uuid())
+  user_id    String
+  token      String     @unique
+  type       EVENT_TYPE
+  expires_at DateTime
+  used       Boolean    @default(false)
+  created_at DateTime   @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
+model Outbox{
+  id String @id @default(uuid())
+
+  event_type EVENT_TYPE
+  payload Json
+
+  status STATUS_OUTBOX @default(PENDING)
+
+  retryCount Int @default(0)
+
+  nextRetryAt DateTime @default(now())
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
