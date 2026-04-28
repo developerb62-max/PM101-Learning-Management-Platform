@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserRepository } from '../user/user.repository';
-import { CreateUserDTO } from './dto/createUser.dto';
 import { randomBytes } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { TokenRepository } from './repository/token.repository';
@@ -8,6 +7,7 @@ import { EVENT_TYPE } from '../../../generated/prisma/enums';
 import { mintesToMilliseconds } from 'src/shared/time/time.util';
 import { TransactionPort } from '../db/transaction/transaction.port';
 import { OutboxRepository } from './repository/outbox.repository';
+import { RegisterUserDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -38,8 +38,12 @@ export class AuthService {
    * });
    * // { message: 'Verification email sent successfully. Please check your inbox.' }
    */
-  public async register(dto: CreateUserDTO) {
-    const { name, email, password } = dto;
+  public async register(dto: RegisterUserDto) {
+    const { name, email, password, confirmPassword } = dto;
+
+    if (password !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
 
     const user = await this.userRepo.findByEmail(email);
     if (user)
