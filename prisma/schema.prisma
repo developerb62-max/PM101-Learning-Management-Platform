@@ -85,6 +85,7 @@ model Course {
   duration      Int?
   level         String?
 
+  price         Decimal
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

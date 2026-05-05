@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '../generated/prisma/client';
+import { Prisma, PrismaClient, UserRole } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const prisma = new PrismaClient({
@@ -28,7 +28,7 @@ async function main() {
         level: i % 2 === 0 ? 'BEGINNER' : 'INTERMEDIATE',
         duration: 60 * i,
         adminId: admin.id,
-
+        price: new Prisma.Decimal(100 * i),
         modules: {
           create: [
             {
